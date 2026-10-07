@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoiceTask AI | AWS Voice-to-Text Task Manager</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Header Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">🎙️</div>
+        <div class="brand-title">VoiceTask AI</div>
+        <span class="brand-tag">AWS Cloud</span>
+      </a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html" class="nav-link active">Dashboard</a></li>
+          <li><a href="tasks.html" class="nav-link">All Tasks</a></li>
+          <li><a href="settings.html" class="nav-link">Settings</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    
+    <!-- Dashboard Top Title & API Status -->
+    <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <h1 class="dashboard-title">Cosmic Task Dashboard</h1>
+        <p class="dashboard-subtitle">Speak naturally to generate intelligent structured tasks with AWS Speech AI</p>
+      </div>
+      <div style="font-size:0.85rem; background:rgba(255,255,255,0.06); padding:0.45rem 1rem; border-radius:var(--radius-full); border:1px solid var(--border-glass-bright);">
+        API Engine: <strong id="api-status">Connecting...</strong>
+      </div>
+    </div>
+
+    <!-- Statistics Overview Cards -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-title">Total Tasks</span>
+        <span class="stat-value" id="stat-total">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">Pending</span>
+        <span class="stat-value" id="stat-pending">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">Completed</span>
+        <span class="stat-value" id="stat-completed" style="color:#10b981;">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">Urgent</span>
+        <span class="stat-value urgent" id="stat-urgent">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-title">Overdue</span>
+        <span class="stat-value" id="stat-overdue" style="color:#f59e0b;">0</span>
+      </div>
+    </section>
+
+    <!-- Hero Voice Task Creation Card -->
+    <section class="voice-card">
+      <h2 class="voice-title">Create Task by Voice</h2>
+      <p class="voice-subtitle">Tap the microphone orb and speak naturally (e.g. "Remind me to submit my Python assignment tomorrow at 5 PM. It is very important.")</p>
+
+      <div class="mic-btn-container">
+        <button id="mic-btn" class="mic-btn" aria-label="Start Voice Recording">🎙️</button>
+        <div id="record-status" class="recording-status">Tap microphone orb to speak</div>
+        <div id="record-timer" class="timer">00:00</div>
+      </div>
+    </section>
+
+
+    <!-- Task Controls & Filtering Bar -->
+    <section class="controls-bar">
+      <input type="text" id="search-input" class="search-input" placeholder="Search tasks by title, category...">
+      <div class="filter-group">
+        <button class="filter-btn active">All</button>
+        <button class="filter-btn">Today</button>
+        <button class="filter-btn">Upcoming</button>
+        <button class="filter-btn">Urgent</button>
+        <button class="filter-btn">High Priority</button>
+        <button class="filter-btn">Completed</button>
+      </div>
+    </section>
+
+    <!-- Tasks Grid View -->
+    <section>
+      <div id="tasks-container" class="tasks-grid">
+        <!-- Sample Initial Placeholder State -->
+        <div class="task-card">
+          <div class="task-header">
+            <h3 class="task-title">Submit Python Assignment</h3>
+            <div>
+              <span class="badge badge-high">High</span>
+              <span class="badge badge-urgent">⚡ Urgent</span>
+            </div>
+          </div>
+          <p class="task-description">Submit the Python assignment to professor before deadline</p>
+          <div class="task-meta">
+            <span>📅 Tomorrow</span>
+            <span>⏰ 5:00 PM</span>
+            <span>📚 College</span>
+          </div>
+          <div class="task-footer">
+            <span class="badge" style="background:#eff6ff; color:#3b82f6;">Pending</span>
+            <div style="display:flex; gap:0.5rem;">
+              <button class="btn btn-secondary" style="padding:0.25rem 0.5rem;">Edit</button>
+              <button class="btn btn-danger" style="padding:0.25rem 0.5rem;">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- TASK PREVIEW / CONFIRMATION MODAL -->
+  <div id="preview-modal" class="modal-backdrop">
+    <div class="modal">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h2 style="font-size:1.25rem; font-weight:700; color:var(--text-main);">🤖 Task Detected</h2>
+        <button id="close-modal-btn" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-muted);">&times;</button>
+      </div>
+      
+      <div style="background:var(--bg-main); padding:1rem; border-radius:var(--radius-md); margin-bottom:1.25rem; font-size:0.9rem;">
+        <strong style="color:var(--text-muted); display:block; margin-bottom:0.25rem;">Original Transcription:</strong>
+        <p id="modal-transcript-text" style="font-style:italic; color:var(--text-main);">"Remind me to submit my Python assignment tomorrow at 5 PM. It is very important."</p>
+      </div>
+
+      <form id="task-preview-form">
+        <div style="margin-bottom:1rem;">
+          <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Task Title</label>
+          <input type="text" id="preview-title" class="search-input" style="width:100%;" value="Submit Python Assignment" required>
+        </div>
+
+        <div style="margin-bottom:1rem;">
+          <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Description</label>
+          <textarea id="preview-description" class="search-input" style="width:100%; height:70px; resize:vertical;">Submit Python assignment to professor</textarea>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+          <div>
+            <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Due Date</label>
+            <input type="date" id="preview-date" class="search-input" style="width:100%;">
+          </div>
+          <div>
+            <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Due Time</label>
+            <input type="time" id="preview-time" class="search-input" style="width:100%;">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.75rem; margin-bottom:1.5rem;">
+          <div>
+            <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Priority</label>
+            <select id="preview-priority" class="search-input" style="width:100%;">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high" selected>High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Urgency</label>
+            <select id="preview-urgency" class="search-input" style="width:100%;">
+              <option value="false">Normal</option>
+              <option value="true" selected>Urgent ⚡</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display:block; font-size:0.85rem; font-weight:600; margin-bottom:0.25rem;">Category</label>
+            <select id="preview-category" class="search-input" style="width:100%;">
+              <option value="College" selected>College</option>
+              <option value="Work">Work</option>
+              <option value="Personal">Personal</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Study">Study</option>
+              <option value="Meeting">Meeting</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+          <button type="button" id="cancel-preview-btn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    AI Voice-to-Text Task Manager using AWS &bull; College Capstone Project
+  </footer>
+
+  <!-- Modular JavaScript Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/recorder.js"></script>
+  <script src="js/tasks.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
